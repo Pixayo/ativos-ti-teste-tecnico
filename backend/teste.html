@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<!-- Gerado pelo Gemini para testar o servidor -->
+
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Equipamentos</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            background: #f4f4f9; 
+            color: #333; 
+            max-width: 600px; 
+            margin: 20px auto; 
+            padding: 0 15px; 
+        }
+        h2 { text-align: center; color: #222; }
+        
+        .card { 
+            background: #fff; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            margin-bottom: 20px; 
+        }
+        
+        /* Layout em grid para o formulário ficar compacto */
+        .grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+        }
+        input, select, button { 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        
+        /* Botões */
+        button { cursor: pointer; border: none; font-weight: bold; }
+        .btn-add { background: #007bff; color: white; grid-column: span 2; }
+        .btn-refresh { background: #6c757d; color: white; margin-bottom: 15px; }
+        .btn-del { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; width: auto; border-radius: 3px; }
+        
+        /* Lista e Itens */
+        .item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px 0; 
+            border-bottom: 1px solid #eee; 
+        }
+        .item:last-child { border-bottom: none; }
+        
+        .info { font-size: 14px; }
+        .info strong { display: block; font-size: 15px; margin-bottom: 4px; }
+        .info span { color: #666; font-size: 12px; }
+        
+        /* Cores de Status Dinâmicas */
+        .badge { 
+            padding: 3px 6px; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            color: #fff; 
+            margin-left: 5px; 
+        }
+        .st-ativo { background: #28a745; } /* Verde */
+        .st-manutencao { background: #ffc107; color: #000; } /* Amarelo */
+        .st-inativo { background: #6c757d; } /* Cinza */
+    </style>
+</head>
+<body>
+
+    <h2>💻 Painel de Ativos</h2>
+
+    <div class="card">
+        <form id="formCadastro">
+            <div class="grid">
+                <input type="text" id="nome" placeholder="Nome (Ex: Notebook)" required>
+                <input type="text" id="tipo" placeholder="Tipo (Ex: TI)" required>
+                <input type="date" id="data" required>
+                <select id="status" required>
+                    <option value="" disabled selected>Status...</option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Em Manutenção">Em Manutenção</option>
+                    <option value="Inativo">Inativo</option>
+                </select>
+                <button type="submit" class="btn-add">Adicionar Equipamento</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <button onclick="buscarEquipamentos()" class="btn-refresh">Atualizar Lista</button>
+        <div id="lista-resultados"></div>
+    </div>
+
+    <script>
+        window.onload = buscarEquipamentos;
+
+        // 1. CADASTRAR (POST) - Sem alertas
+        document.getElementById('formCadastro').addEventListener('submit', async (evento) => {
+            evento.preventDefault(); 
+            const dados = {
+                nome: document.getElementById('nome').value,
+                tipo: document.getElementById('tipo').value,
+                data_de_aquisicao: document.getElementById('data').value,
+                status: document.getElementById('status').value
+            };
+
+            await fetch('http://localhost:3001/equipamentos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+            
+            document.getElementById('formCadastro').reset();
+            buscarEquipamentos(); 
+        });
+
+        // 2. BUSCAR (GET) - Mais informativo e com cores
+        async function buscarEquipamentos() {
+            const divLista = document.getElementById('lista-resultados');
+            divLista.innerHTML = "<p style='text-align:center; font-size:12px;'>Carregando...</p>";
+
+            const resposta = await fetch('http://localhost:3001/equipamentos');
+            const equipamentos = await resposta.json();
+            divLista.innerHTML = '';
+
+            if (equipamentos.length === 0) {
+                divLista.innerHTML = "<p style='text-align:center; font-size:12px; color:#999;'>Nenhum registro encontrado.</p>";
+                return;
+            }
+
+            equipamentos.forEach(item => {
+                const data = new Date(item.data_de_aquisicao).toLocaleDateString('pt-BR');
+                
+                // Define a classe de cor baseada no status
+                let classeStatus = '';
+                if (item.status === 'Ativo') classeStatus = 'st-ativo';
+                else if (item.status === 'Em Manutenção') classeStatus = 'st-manutencao';
+                else classeStatus = 'st-inativo';
+
+                divLista.innerHTML += `
+                    <div class="item">
+                        <div class="info">
+                            <strong>${item.nome} <span class="badge ${classeStatus}">${item.status}</span></strong>
+                            <span>ID: ${item.id} | Tipo: ${item.tipo} | Adquirido em: ${data}</span>
+                        </div>
+                        <button class="btn-del" onclick="deletarEquipamento(${item.id})">Apagar</button>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. DELETAR (DELETE) - Direto ao ponto, sem confirmação
+        async function deletarEquipamento(id) {
+            await fetch(`http://localhost:3001/equipamentos/${id}`, { method: 'DELETE' });
+            buscarEquipamentos();
+        }
+    </script>
+</body>
+
+</html>
