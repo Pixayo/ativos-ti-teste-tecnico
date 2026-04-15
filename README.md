@@ -48,7 +48,8 @@ O sistema utiliza um arquivo `.env` para a conexão. Existe um arquivo de exempl
 cp .env.example .env
 ```
 
-> [NOTE!] Certifique-se de que a `DATABASE_URL` no arquivo `.env` coincide com as credenciais definidas no seu `docker-compose.yml`.
+> [!NOTE] 
+> Certifique-se de que a `DATABASE_URL` no arquivo `.env` coincide com as credenciais definidas no seu > `docker-compose.yml`.
 
 #### 2.2 Inicializando o banco de dados
 Executa o script para criar as tabelas necessárias
