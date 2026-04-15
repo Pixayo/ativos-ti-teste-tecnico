@@ -81,16 +81,20 @@ npm run dev
 
 Acesse o link exibido no terminal (ex: http://localhost:5173/) e teste o programa.
 
-## Diferenciais
+## Funcionalidades (Requisitos Atendidos)
 
 - CRUD Completo: Cadastro, listagem, edição e exclusão de equipamentos.
 
 - Filtros Inteligentes: Busca combinada em tempo real por ID, Nome, Tipo e Status.
 
-- Interface Visual: Uso de Badges coloridos para identificar o estado do equipamento (Ativo/Manutenção).
-
-- Persistência Real: Integração com PostgreSQL via Docker.
+- Persistência Real: Integração com banco de dados PostgreSQL.
 
 - Responsividade: Layout adaptável para dispositivos móveis e desktop.
 
-- Clean Code: Organização de pastas seguindo separação de responsabilidades.
+## Diferenciais Implementados
+
+- Infraestrutura: Uso de Docker e Docker Compose para padronizar o ambiente de desenvolvimento.
+
+- Arquitetura (Clean Code): Organização de pastas seguindo a separação de responsabilidades (Routes, Controllers, Services).
+
+- Interface Visual: Uso de Badges coloridos para facilitar a identificação do estado do equipamento (Ativo/Manutenção).
