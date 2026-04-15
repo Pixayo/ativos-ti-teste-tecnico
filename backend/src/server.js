@@ -48,6 +48,32 @@ app.get('/equipamentos', async (req, res) => {
   }
 });
 
+app.put('/equipamentos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome, tipo, data_de_aquisicao, status } = req.body;
+
+    const query = `
+      UPDATE equipamentos 
+      SET nome = $1, tipo = $2, data_de_aquisicao = $3, status = $4
+      WHERE id = $5 RETURNING *;
+    `;
+    
+    const valores = [nome, tipo, data_de_aquisicao, status, id];
+    const resultado = await db.query(query, valores);
+
+    // Se não encontrar o ID, avisa que não achou
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ erro: 'Equipamento não encontrado' });
+    }
+
+    res.status(200).json(resultado.rows[0]);
+  } catch (erro) {
+    console.error("Erro ao atualizar:", erro);
+    res.status(500).json({ erro: 'Erro ao atualizar' });
+  }
+});
+
 app.delete('/equipamentos/:id', async (req, res) => {
   try {
     const { id } = req.params;
