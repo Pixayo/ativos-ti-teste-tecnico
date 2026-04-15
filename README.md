@@ -16,9 +16,14 @@ Certifique-se de ter instalado:
 - [Docker](https://www.docker.com/) e Docker Compose
 - [Git](https://git-scm.com/)
 
----
-
 ## Como executar o projeto localmente
+
+Antes de tudo, após ter clonado o repositório, certifiquesse que seu terminal se encontra na raiz do projeto.
+```bash
+pwd
+```
+
+O primeiro diretório retornado pelo comando `pwd` deveria ser o do projeto (ex: `OUTROS/DIRETORIOS/ativos-ti-teste-tecnico`)
 
 ### 1. Iniciar o Banco de Dados (Docker)
 Na raiz do projeto, execute o comando para subir o container do banco:
@@ -43,12 +48,12 @@ O sistema utiliza um arquivo `.env` para a conexão. Existe um arquivo de exempl
 cp .env.example .env
 ```
 
-> [!NOTE] Certifique-se de que a `DATABASE_URL` no arquivo `.env` coincide com as credenciais definidas no seu `docker-compose.yml`.
+> [NOTE!] Certifique-se de que a `DATABASE_URL` no arquivo `.env` coincide com as credenciais definidas no seu `docker-compose.yml`.
 
 #### 2.2 Inicializando o banco de dados
 Executa o script para criar as tabelas necessárias
 ```bash
-node init-db.js
+node src/init-db.js
 ```
 
 #### 2.3 Iniciar o servidor
@@ -73,7 +78,7 @@ Depois inicialize a interface executando:
 npm run dev
 ```
 
-Acesse o link exibido no terminal (ex: http://localhost:5173/).
+Acesse o link exibido no terminal (ex: http://localhost:5173/) e teste o programa.
 
 ## Diferenciais
 
