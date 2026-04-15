@@ -18,7 +18,7 @@ Certifique-se de ter instalado:
 
 ## Como executar o projeto localmente
 
-Antes de tudo, após ter clonado o repositório, certifiquesse que seu terminal se encontra na raiz do projeto.
+Antes de tudo, após ter clonado o repositório, certifiques-se que seu terminal se encontra na raiz do projeto.
 ```bash
 pwd
 ```
@@ -49,7 +49,7 @@ cp .env.example .env
 ```
 
 > [!NOTE] 
-> Certifique-se de que a `DATABASE_URL` no arquivo `.env` coincide com as credenciais definidas no seu > `docker-compose.yml`.
+> Certifique-se de que a `DATABASE_URL` no arquivo `.env` coincide com as credenciais definidas no seu `docker-compose.yml`.
 
 #### 2.2 Inicializando o banco de dados
 Executa o script para criar as tabelas necessárias
