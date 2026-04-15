@@ -1,5 +1,7 @@
 const db = require('./db');
 
+// Execute: "node init-db.js" para preparar o banco de dados
+
 const newTable = async () => {
   const sql = `
     CREATE TABLE IF NOT EXISTS equipamentos (
