@@ -18,7 +18,7 @@ Certifique-se de ter instalado:
 
 ## Como executar o projeto localmente
 
-Antes de tudo, após ter clonado o repositório, certifiques-se que seu terminal se encontra na raiz do projeto.
+Antes de tudo, após ter clonado o repositório, garanta que seu terminal se encontra na raiz do projeto.
 ```bash
 pwd
 ```
