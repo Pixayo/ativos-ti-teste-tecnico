@@ -1,43 +1,90 @@
-## Sobre
+# Sistema de Gerenciamento de Ativos de TI (UNICEPLAC)
 
-Breve descrição do objetivo do sistema (gerenciamento de ativos para laboratórios).
-
-## Pré-requisitos
-
-Lista das ferramentas necessárias (Node.js, Docker, Git).
-
-## Como rodar o projeto
-
-Passo 1: Clonar o repositório
-
-Passo 2: Configuração do Banco de Dados
-
-- Instruções para rodar o docker-compose up e subir o PostgreSQL.
-
-Passo 3: Backend
-
-- Instruções de instalação de dependências e execução da API.
-
-Passo 4: Frontend
-
-- Instruções de instalação e execução da interface.
+Este projeto foi desenvolvido como parte do teste técnico para a vaga de Desenvolvedor Full-Stack. O sistema consiste em uma plataforma para gerenciamento de equipamentos de TI, permitindo o controle completo de inventário com persistência em banco de dados real.
 
 ## Tecnologias Utilizadas
 
-Backend: Node.js (Express/NestJS).
+- **Frontend:** React (Vite), React Router Dom, Axios.
+- **Backend:** Node.js (Express).
+- **Banco de Dados:** PostgreSQL.
+- **Infraestrutura:** Docker e Docker Compose.
 
-Frontend: React/Angular.
+## Pré-requisitos
 
-Banco de Dados: PostgreSQL/MongoDB.
+Certifique-se de ter instalado:
+- [Node.js](https://nodejs.org/) (v18+)
+- [Docker](https://www.docker.com/) e Docker Compose
+- [Git](https://git-scm.com/)
 
-## Funcionalidades
+---
 
-CRUD de Equipamentos (Monitor, CPU, Teclado).
+## Como executar o projeto localmente
 
-Filtros por tipo ou status.
+### 1. Iniciar o Banco de Dados (Docker)
+Na raiz do projeto, execute o comando para subir o container do banco:
+```bash
+docker-compose up -d
+```
 
-Dashboard responsivo.
+### 2. Configurar o Backend
+Abra um terminal e navegue até a pasta do servidor:
+```bash
+cd backend
+```
 
-## Desafio Extra
+Após isso, instale as dependências com:
+```bash
+npm install
+```
 
-Explicação sobre o script de exportação de dados (JSON/CSV).
+#### 2.1 Variáveis de Ambiente:
+O sistema utiliza um arquivo `.env` para a conexão. Existe um arquivo de exemplo chamado `.env.example`. Para configurar, execute:
+```bash
+cp .env.example .env
+```
+
+> [!NOTE] Certifique-se de que a `DATABASE_URL` no arquivo `.env` coincide com as credenciais definidas no seu `docker-compose.yml`.
+
+#### 2.2 Inicializando o banco de dados
+Executa o script para criar as tabelas necessárias
+```bash
+node init-db.js
+```
+
+#### 2.3 Iniciar o servidor
+Execute no diretório `backend`:
+```bash
+node src/server.js
+```
+
+### 3. Configurar o Frontend
+Abra um **novo terminal**, navegue até a pasta do cliente:
+```bash
+cd frontend
+```
+
+Após isso, instale as dependências com:
+```bash
+npm install
+```
+
+Depois inicialize a interface executando:
+```bash
+npm run dev
+```
+
+Acesse o link exibido no terminal (ex: http://localhost:5173/).
+
+## Diferenciais
+
+- CRUD Completo: Cadastro, listagem, edição e exclusão de equipamentos.
+
+- Filtros Inteligentes: Busca combinada em tempo real por ID, Nome, Tipo e Status.
+
+- Interface Visual: Uso de Badges coloridos para identificar o estado do equipamento (Ativo/Manutenção).
+
+- Persistência Real: Integração com PostgreSQL via Docker.
+
+- Responsividade: Layout adaptável para dispositivos móveis e desktop.
+
+- Clean Code: Organização de pastas seguindo separação de responsabilidades.
