@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<!-- Gerado pelo Gemini para testar o servidor -->
+<!-- Gerado pelo Gemini para testar rotas -->
 
 <html lang="pt-BR">
 
@@ -8,75 +8,34 @@
     <meta charset="UTF-8">
     <title>Painel de Equipamentos</title>
     <style>
-        body { 
-            font-family: sans-serif; 
-            background: #f4f4f9; 
-            color: #333; 
-            max-width: 600px; 
-            margin: 20px auto; 
-            padding: 0 15px; 
-        }
+        body { font-family: sans-serif; background: #f4f4f9; color: #333; max-width: 600px; margin: 20px auto; padding: 0 15px; }
         h2 { text-align: center; color: #222; }
+        .card { background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        input, select, button { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
         
-        .card { 
-            background: #fff; 
-            padding: 15px; 
-            border: 1px solid #ddd; 
-            border-radius: 6px; 
-            margin-bottom: 20px; 
-        }
-        
-        /* Layout em grid para o formulário ficar compacto */
-        .grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            margin-bottom: 10px; 
-        }
-        input, select, button { 
-            padding: 8px; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-            width: 100%; 
-            box-sizing: border-box; 
-        }
-        
-        /* Botões */
         button { cursor: pointer; border: none; font-weight: bold; }
         .btn-add { background: #007bff; color: white; grid-column: span 2; }
+        .btn-cancelar { background: #6c757d; color: white; grid-column: span 2; display: none; } /* Escondido por padrão */
         .btn-refresh { background: #6c757d; color: white; margin-bottom: 15px; }
         .btn-del { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; width: auto; border-radius: 3px; }
+        .btn-edit { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; width: auto; border-radius: 3px; margin-right: 5px;}
         
-        /* Lista e Itens */
-        .item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 12px 0; 
-            border-bottom: 1px solid #eee; 
-        }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
         .item:last-child { border-bottom: none; }
-        
         .info { font-size: 14px; }
         .info strong { display: block; font-size: 15px; margin-bottom: 4px; }
         .info span { color: #666; font-size: 12px; }
         
-        /* Cores de Status Dinâmicas */
-        .badge { 
-            padding: 3px 6px; 
-            border-radius: 12px; 
-            font-size: 11px; 
-            color: #fff; 
-            margin-left: 5px; 
-        }
-        .st-ativo { background: #28a745; } /* Verde */
-        .st-manutencao { background: #ffc107; color: #000; } /* Amarelo */
-        .st-inativo { background: #6c757d; } /* Cinza */
+        .badge { padding: 3px 6px; border-radius: 12px; font-size: 11px; color: #fff; margin-left: 5px; }
+        .st-ativo { background: #28a745; }
+        .st-manutencao { background: #ffc107; color: #000; }
+        .st-inativo { background: #6c757d; }
     </style>
 </head>
 <body>
 
-    <h2>💻 Painel de Ativos</h2>
+    <h2>Painel de Ativos</h2>
 
     <div class="card">
         <form id="formCadastro">
@@ -90,7 +49,8 @@
                     <option value="Em Manutenção">Em Manutenção</option>
                     <option value="Inativo">Inativo</option>
                 </select>
-                <button type="submit" class="btn-add">Adicionar Equipamento</button>
+                <button type="submit" id="btnSalvar" class="btn-add">Adicionar Equipamento</button>
+                <button type="button" id="btnCancelar" class="btn-cancelar" onclick="cancelarEdicao()">Cancelar Edição</button>
             </div>
         </form>
     </div>
@@ -101,9 +61,12 @@
     </div>
 
     <script>
+        // Variável para guardar o ID do item sendo editado (null significa que estamos criando um novo)
+        let idEditando = null; 
+
         window.onload = buscarEquipamentos;
 
-        // 1. CADASTRAR (POST) - Sem alertas
+        // 1. CADASTRAR OU ATUALIZAR (POST ou PUT)
         document.getElementById('formCadastro').addEventListener('submit', async (evento) => {
             evento.preventDefault(); 
             const dados = {
@@ -113,17 +76,26 @@
                 status: document.getElementById('status').value
             };
 
-            await fetch('http://localhost:3001/equipamentos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
-            });
+            // Se idEditando tiver um número, fazemos um PUT (Atualizar). Se for null, fazemos um POST (Criar)
+            if (idEditando) {
+                await fetch(`http://localhost:3001/equipamentos/${idEditando}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+            } else {
+                await fetch('http://localhost:3001/equipamentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+            }
             
-            document.getElementById('formCadastro').reset();
-            buscarEquipamentos(); 
+            cancelarEdicao(); // Limpa o formulário e reseta os botões
+            buscarEquipamentos(); // Atualiza a lista
         });
 
-        // 2. BUSCAR (GET) - Mais informativo e com cores
+        // 2. BUSCAR (GET)
         async function buscarEquipamentos() {
             const divLista = document.getElementById('lista-resultados');
             divLista.innerHTML = "<p style='text-align:center; font-size:12px;'>Carregando...</p>";
@@ -138,9 +110,10 @@
             }
 
             equipamentos.forEach(item => {
-                const data = new Date(item.data_de_aquisicao).toLocaleDateString('pt-BR');
+                // Ajustando a data para o formato aceito pelo formulário HTML (YYYY-MM-DD)
+                const dataFormatadaFormulario = item.data_de_aquisicao.split('T')[0];
+                const dataTela = new Date(item.data_de_aquisicao).toLocaleDateString('pt-BR');
                 
-                // Define a classe de cor baseada no status
                 let classeStatus = '';
                 if (item.status === 'Ativo') classeStatus = 'st-ativo';
                 else if (item.status === 'Em Manutenção') classeStatus = 'st-manutencao';
@@ -150,15 +123,46 @@
                     <div class="item">
                         <div class="info">
                             <strong>${item.nome} <span class="badge ${classeStatus}">${item.status}</span></strong>
-                            <span>ID: ${item.id} | Tipo: ${item.tipo} | Adquirido em: ${data}</span>
+                            <span>ID: ${item.id} | Tipo: ${item.tipo} | Adquirido em: ${dataTela}</span>
                         </div>
-                        <button class="btn-del" onclick="deletarEquipamento(${item.id})">Apagar</button>
+                        <div>
+                            <button class="btn-edit" onclick="preencherEdicao(${item.id}, '${item.nome}', '${item.tipo}', '${dataFormatadaFormulario}', '${item.status}')">Editar</button>
+                            <button class="btn-del" onclick="deletarEquipamento(${item.id})">Apagar</button>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        // 3. DELETAR (DELETE) - Direto ao ponto, sem confirmação
+        // 3. PREPARAR A EDIÇÃO (Puxa os dados para o formulário)
+        function preencherEdicao(id, nome, tipo, data, status) {
+            idEditando = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('tipo').value = tipo;
+            document.getElementById('data').value = data;
+            document.getElementById('status').value = status;
+            
+            // Muda o visual do botão e mostra o botão cancelar
+            document.getElementById('btnSalvar').innerText = "Salvar Alterações";
+            document.getElementById('btnSalvar').style.backgroundColor = "#ffc107";
+            document.getElementById('btnSalvar').style.color = "#000";
+            document.getElementById('btnCancelar').style.display = "block";
+            
+            // Rola a página para o topo (útil se a lista for longa)
+            window.scrollTo(0, 0);
+        }
+
+        // 4. CANCELAR EDIÇÃO (Limpa tudo e volta ao normal)
+        function cancelarEdicao() {
+            idEditando = null;
+            document.getElementById('formCadastro').reset();
+            document.getElementById('btnSalvar').innerText = "Adicionar Equipamento";
+            document.getElementById('btnSalvar').style.backgroundColor = "#007bff";
+            document.getElementById('btnSalvar').style.color = "white";
+            document.getElementById('btnCancelar').style.display = "none";
+        }
+
+        // 5. DELETAR (DELETE)
         async function deletarEquipamento(id) {
             await fetch(`http://localhost:3001/equipamentos/${id}`, { method: 'DELETE' });
             buscarEquipamentos();
